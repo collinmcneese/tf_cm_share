@@ -138,6 +138,25 @@ resource "aws_instance" "a2_servers" {
   }
 }
 
+resource "null_resource" "fetch_automate_credentials" {
+  depends_on = [
+    aws_instance.a2_servers,
+  ]
+  triggers = {
+    instance_ids = join(",", aws_instance.a2_servers.*.id)
+  }
+
+  count = length(aws_instance.a2_servers.*)
+
+  provisioner "local-exec" {
+    command = <<-LOCAL
+      if grep -q '${aws_instance.a2_servers[0].public_ip}' ~/.ssh/known_hosts ; then sed -i '/${aws_instance.a2_servers[0].public_ip}/d' ~/.ssh/known_hosts ; fi
+      ssh-keyscan -H ${aws_instance.a2_servers[0].public_ip} >> ~/.ssh/known_hosts
+      scp -i ${var.aws_key_file_local} ec2-user@${aws_instance.a2_servers[0].public_ip}:automate-credentials.toml automate-credentials.toml
+    LOCAL
+  }
+}
+
 resource "aws_instance" "client_servers" {
   depends_on                  = [aws_instance.a2_servers]
   count                       = length(var.client_servers)

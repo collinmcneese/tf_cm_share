@@ -40,6 +40,7 @@ module "a2_with_clients" {
     "sudo /tmp/chef-automate deploy --accept-terms-and-mlsa --product automate --product infra-server --product builder --fqdn $A2FQDN",
     "sudo chef-server-ctl user-create testuser test user testuser@localhost.localdomain 'Abcd1234' --filename ~/testuser.pem",
     "sudo chef-server-ctl org-create a2local 'A2 Local' --association_user testuser --filename ~/a2local-validator.pem",
+    "sudo chmod 644 automate-credentials.toml",
   ]
   # this will be fed to the client_servers remote-exec provisioner
   provisioner_exec_data_client = [
