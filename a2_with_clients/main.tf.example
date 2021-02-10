@@ -1,0 +1,69 @@
+
+module "a2_with_clients" {
+  vpc_name                    = ""
+  subnet_name                 = ""
+  # Path to the a2_with_clients module relative to this directory
+  source                      = "../modules/a2_with_clients/"
+  # List of Chef Automate servers to create (this example only supports creating one)
+  a2_servers                  = ["automate-server"]
+  # List of clients to create which will be bootstrapped to Automate/CS instance
+  client_servers              = ["client01", "client02"]
+  # Will be prefixed on systen names for the Name tag - use first initial and last name
+  system_name_prefix          = ""
+  # Contact e-mail address to populate the X-Contact tag
+  contact_tag_value           = ""
+  # Department value
+  department_tag_value        = ""
+  # select which AWS_PROFILE should be used
+  aws_profile_name            = ""
+  # select AWS_REGION
+  aws_region                  = ""
+  # Name of AWS credential keypair to use (for ssh access to instances)
+  aws_key                     = ""
+  # Path to local copy of pem file for aws_key, used for SSH access with provisioners
+  aws_key_file_local          = ""
+  # Name of security group to create (should be descriptive)
+  security_group_name         = ""
+  # List of CIDR addresses in notation "x.x.x.x/y" which will have access to the instances which are created.
+  #  This should _not_ be 0.0.0.0/0, restrict to your current public IP address.
+  security_group_ingress_cidr = []
+  # Default root volume size for instances which are created
+  system_root_volume_size     = 20
+  # this will be fed to the automate_servers remote-exec provisioner
+  provisioner_exec_data_a2    = [
+    "sudo sysctl -w vm.max_map_count=262144",
+    "sudo sysctl -w vm.dirty_expire_centisecs=20000",
+    "curl -fsSL https://packages.chef.io/files/current/automate/latest/chef-automate_linux_amd64.zip -o /tmp/chef-automate_linux_amd64.zip",
+    "unzip -qod /tmp /tmp/chef-automate_linux_amd64.zip",
+    "chmod +x /tmp/chef-automate",
+    "export A2FQDN=$(curl http://169.254.169.254/latest/meta-data/public-hostname)",
+    "sudo /tmp/chef-automate deploy --accept-terms-and-mlsa --product automate --product infra-server --product builder --fqdn $A2FQDN",
+    "sudo chef-server-ctl user-create testuser test user testuser@localhost.localdomain 'Abcd1234' --filename ~/testuser.pem",
+    "sudo chef-server-ctl org-create a2local 'A2 Local' --association_user testuser --filename ~/a2local-validator.pem",
+  ]
+  # this will be fed to the client_servers remote-exec provisioner
+  provisioner_exec_data_client = [
+    "curl -L https://omnitruck.chef.io/install.sh | sudo bash",
+  ]
+}
+
+output "a2_name" {
+  description = "List of Names assigned to the instances"
+  value       = module.a2_with_clients.instance_name_a2_servers
+}
+output "a2_dns" {
+  value       = module.a2_with_clients.public_dns_a2_servers
+}
+output "a2_ip" {
+  description = "List of public IP addresses assigned to the instances"
+  value       = module.a2_with_clients.public_ip_a2_servers
+}
+
+output "client_names" {
+  description = "List of Names assigned to the instances"
+  value       = module.a2_with_clients.instance_name_client_servers
+}
+output "client_ips" {
+  description = "List of public IP addresses assigned to the instances"
+  value       = module.a2_with_clients.public_ip_client_servers
+}
