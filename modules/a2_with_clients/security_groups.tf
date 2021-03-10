@@ -89,3 +89,12 @@ resource "aws_security_group_rule" "ingress_rule_data_collector_clients" {
   ]
   security_group_id = aws_security_group.amz_server_sg.id
 }
+
+resource "aws_security_group_rule" "ingress_rule_kibana_cidr" {
+  type              = "ingress"
+  from_port         = 5601
+  to_port           = 5601
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
