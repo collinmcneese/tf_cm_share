@@ -1,6 +1,8 @@
 
 module "a2_with_clients" {
+  # Pre-existing VPC name
   vpc_name                    = ""
+  # Pre-existing subnet name
   subnet_name                 = ""
   # Path to the a2_with_clients module relative to this directory
   source                      = "../modules/a2_with_clients/"
@@ -26,11 +28,11 @@ module "a2_with_clients" {
   security_group_name         = ""
   # List of CIDR addresses in notation "x.x.x.x/y" which will have access to the instances which are created.
   #  This should _not_ be 0.0.0.0/0, restrict to your current public IP address.
-  security_group_ingress_cidr = []
+  security_group_ingress_cidr = ["1.1.1.1/32"]
   # Default root volume size for instances which are created
   system_root_volume_size     = 20
   # this will be fed to the automate_servers remote-exec provisioner
-  provisioner_exec_data_a2    = [
+  provisioner_exec_data_a2 = [
     "sudo sysctl -w vm.max_map_count=262144",
     "sudo sysctl -w vm.dirty_expire_centisecs=20000",
     "curl -fsSL https://packages.chef.io/files/current/automate/latest/chef-automate_linux_amd64.zip -o /tmp/chef-automate_linux_amd64.zip",
@@ -44,27 +46,27 @@ module "a2_with_clients" {
   ]
   # this will be fed to the client_servers remote-exec provisioner
   provisioner_exec_data_client = [
-    "curl -L https://omnitruck.chef.io/install.sh | sudo bash",
+    "echo 'nothing to do!'",
   ]
 }
 
 output "a2_name" {
   description = "List of Names assigned to the instances"
-  value       = module.a2_with_clients.instance_name_a2_servers
+  value       = module.amz_server.instance_name_a2_servers
 }
 output "a2_dns" {
-  value       = module.a2_with_clients.public_dns_a2_servers
+  value = module.amz_server.public_dns_a2_servers
 }
 output "a2_ip" {
   description = "List of public IP addresses assigned to the instances"
-  value       = module.a2_with_clients.public_ip_a2_servers
+  value       = module.amz_server.public_ip_a2_servers
 }
 
 output "client_names" {
   description = "List of Names assigned to the instances"
-  value       = module.a2_with_clients.instance_name_client_servers
+  value       = module.amz_server.instance_name_client_servers
 }
 output "client_ips" {
   description = "List of public IP addresses assigned to the instances"
-  value       = module.a2_with_clients.public_ip_client_servers
+  value       = module.amz_server.public_ip_client_servers
 }
