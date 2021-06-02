@@ -16,6 +16,7 @@ resource "aws_instance" "client_servers" {
 
   tags = {
     Name      = "${var.system_name_prefix} - ${var.client_servers[count.index]}"
+    ChefClientName  = "${var.client_servers[count.index]}"
     X-Contact = var.contact_tag_value
     X-Dept    = var.department_tag_value
     Date      = formatdate("MMM DD, YYYY", timestamp())
@@ -32,10 +33,49 @@ resource "aws_instance" "client_servers" {
   }
 }
 
+resource "null_resource" "pre_bootstrap" {
+  depends_on = [
+    aws_security_group_rule.ingress_rule_https_clients,
+    aws_security_group_rule.ingress_rule_data_collector_clients,
+    aws_instance.a2_servers
+  ]
+
+  provisioner "local-exec" {
+    command = <<-LOCAL_PRE
+      if grep -q '${aws_instance.a2_servers[0].public_ip}' ~/.ssh/known_hosts ; then sed -i '/${aws_instance.a2_servers[0].public_ip}/d' ~/.ssh/known_hosts ; fi
+      ssh-keyscan ${aws_instance.a2_servers[0].public_ip} >> ~/.ssh/known_hosts
+      if [ ! -d .chef ] ; then mkdir .chef ; fi
+      scp -i ${var.aws_key_file_local} ec2-user@${aws_instance.a2_servers[0].public_ip}:testuser.pem .chef/testuser.pem
+      cat << CONFIG > .chef/config.rb
+current_dir = File.dirname(__FILE__)
+  log_level                :info
+  log_location             STDOUT
+  node_name                'testuser'
+  client_key               "#{current_dir}/testuser.pem"
+  chef_server_url          'https://${aws_instance.a2_servers[0].public_dns}/organizations/a2local'
+  # validation_client_name   'a2local-validator'
+  # validation_key           "#{current_dir}/a2local-validator.pem"
+  cache_type               'BasicFile'
+  cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
+  cookbook_path            ["#{current_dir}/../cookbooks"]
+  ssl_verify               :verify_none
+CONFIG
+      cat << CREDENTIALS > .chef/credentials
+[default]
+client_name = 'testuser'
+client_key = '/Users/cmcneese/dev/tf_cm/a2_with_clients/.chef/testuser.pem'
+chef_server_url = 'https://${aws_instance.a2_servers[0].public_dns}/organizations/a2local'
+CREDENTIALS
+      knife ssl fetch https://${aws_instance.a2_servers[0].public_dns}
+    LOCAL_PRE
+  }
+}
+
 resource "null_resource" "client_bootstrap" {
   depends_on = [
     aws_security_group_rule.ingress_rule_https_clients,
     aws_security_group_rule.ingress_rule_data_collector_clients,
+    null_resource.pre_bootstrap,
   ]
   triggers = {
     instance_ids = join(",", aws_instance.client_servers.*.id)
@@ -46,30 +86,9 @@ resource "null_resource" "client_bootstrap" {
   provisioner "local-exec" {
     command = <<-LOCAL
       if grep -q '${aws_instance.client_servers[count.index].public_ip}' ~/.ssh/known_hosts ; then sed -i '/${aws_instance.client_servers[count.index].public_ip}/d' ~/.ssh/known_hosts ; fi
-      if grep -q '${aws_instance.a2_servers[0].public_ip}' ~/.ssh/known_hosts ; then sed -i '/${aws_instance.a2_servers[0].public_ip}/d' ~/.ssh/known_hosts ; fi
-      ssh-keyscan ${aws_instance.a2_servers[0].public_ip} >> ~/.ssh/known_hosts
       ssh-keyscan ${aws_instance.client_servers[count.index].public_ip} >> ~/.ssh/known_hosts
-      # testuserkey=$(ssh -i ${var.aws_key_file_local} ec2-user@${aws_instance.a2_servers[0].public_ip} 'cat testuser.pem')
-      # validatorkey=$(ssh -i ${var.aws_key_file_local} ec2-user@${aws_instance.a2_servers[0].public_ip} 'cat a2local-validator.pem')
       if [ ! -d .chef ] ; then mkdir .chef ; fi
-      scp -i ${var.aws_key_file_local} ec2-user@${aws_instance.a2_servers[0].public_ip}:testuser.pem .chef/testuser.pem
-      # scp -i ${var.aws_key_file_local} ec2-user@${aws_instance.a2_servers[0].public_ip}:a2local-validator.pem .chef/a2local-validator.pem
-      cat << CONFIG > .chef/config.rb
-current_dir = File.dirname(__FILE__)
-  log_level                :info
-  log_location             STDOUT
-  node_name                'testuser'
-  client_key               "#{current_dir}/testuser.pem"
-  chef_server_url          'https://${aws_instance.a2_servers[0].public_dns}/organizations/a2local'
-  cache_type               'BasicFile'
-  cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
-  cookbook_path            ["#{current_dir}/../cookbooks"]
-  ssl_verify               :verify_none
-CONFIG
-      knife ssl fetch https://${aws_instance.a2_servers[0].public_dns}
-      berks install
-      berks upload
-      knife bootstrap ec2-user@${aws_instance.client_servers[count.index].public_ip} -N ${aws_instance.client_servers[count.index].public_dns} -i ${var.aws_key_file_local} --sudo -r 'recipe[chef-client]' -y
+      knife bootstrap ec2-user@${aws_instance.client_servers[count.index].public_ip} -N ${aws_instance.client_servers[count.index].tags.ChefClientName} -i ${var.aws_key_file_local} --sudo -r 'recipe[chef-client]' -y
     LOCAL
   }
 }
