@@ -67,6 +67,8 @@ client_key = '/Users/cmcneese/dev/tf_cm/a2_with_clients/.chef/testuser.pem'
 chef_server_url = 'https://${aws_instance.a2_servers[0].public_dns}/organizations/a2local'
 CREDENTIALS
       knife ssl fetch https://${aws_instance.a2_servers[0].public_dns}
+      berks install
+      berks upload
     LOCAL_PRE
   }
 }
@@ -105,10 +107,10 @@ resource "null_resource" "post_bootstrap" {
   provisioner "local-exec" {
     command = <<-LOCAL_POST
       for n in `knife node list` ; do ssh-keyscan $n >> ~/.ssh/known_hosts ; done
-      chef update ssh_policy.rb
-      chef push test ssh_policy.lock.json
+      chef update default_policy.rb
+      chef push test default_policy.lock.json
       for n in `knife node list` ; do scp waivers.yml ec2-user@$n:/tmp/waivers.yml ;  ssh ec2-user@$n "sudo mkdir -p /var/chef/ ; sudo cp /tmp/waivers.yml /var/chef/" ; done
-      for n in `knife node list` ; do knife node policy set $n test ssh_policy ; done
+      for n in `knife node list` ; do knife node policy set $n test default_policy ; done
       knife ssh -x ec2-user "name:*" "sudo chef-client"
     LOCAL_POST
   }
