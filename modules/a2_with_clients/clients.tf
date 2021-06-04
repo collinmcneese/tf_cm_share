@@ -60,12 +60,6 @@ current_dir = File.dirname(__FILE__)
   cookbook_path            ["#{current_dir}/../cookbooks"]
   ssl_verify               :verify_none
 CONFIG
-      cat << CREDENTIALS > .chef/credentials
-[default]
-client_name = 'testuser'
-client_key = '/Users/cmcneese/dev/tf_cm/a2_with_clients/.chef/testuser.pem'
-chef_server_url = 'https://${aws_instance.a2_servers[0].public_dns}/organizations/a2local'
-CREDENTIALS
       knife ssl fetch https://${aws_instance.a2_servers[0].public_dns}
       berks install
       berks upload
