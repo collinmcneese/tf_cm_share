@@ -4,7 +4,7 @@ resource "aws_instance" "client_servers" {
   count                       = length(var.client_servers)
   ami                         = data.aws_ami.amazon-linux-2.id
   subnet_id                   = data.aws_subnet.selected.id
-  instance_type               = var.system_instance_type
+  instance_type               = var.client_servers_ec2_type
   vpc_security_group_ids      = [aws_security_group.amz_server_sg.id]
   associate_public_ip_address = true
   user_data                   = var.system_init_user_data
@@ -53,8 +53,6 @@ current_dir = File.dirname(__FILE__)
   node_name                'testuser'
   client_key               "#{current_dir}/testuser.pem"
   chef_server_url          'https://${aws_instance.a2_servers[0].public_dns}/organizations/a2local'
-  # validation_client_name   'a2local-validator'
-  # validation_key           "#{current_dir}/a2local-validator.pem"
   cache_type               'BasicFile'
   cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
   cookbook_path            ["#{current_dir}/../cookbooks"]

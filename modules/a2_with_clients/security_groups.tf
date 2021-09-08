@@ -10,10 +10,46 @@ resource "aws_security_group" "amz_server_sg" {
   }
 }
 
+resource "aws_security_group_rule" "internal_sg_traffic" {
+  type              = "ingress"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  security_group_id        = aws_security_group.amz_server_sg.id
+  source_security_group_id = aws_security_group.amz_server_sg.id
+}
+
 resource "aws_security_group_rule" "ingress_rule" {
   type              = "ingress"
   from_port         = 22
   to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_rdp_rule" {
+  type              = "ingress"
+  from_port         = 3389
+  to_port           = 3389
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_winrm_http" {
+  type              = "ingress"
+  from_port         = 5985
+  to_port           = 5985
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_winrm_https" {
+  type              = "ingress"
+  from_port         = 5986
+  to_port           = 5986
   protocol          = "tcp"
   cidr_blocks       = var.security_group_ingress_cidr
   security_group_id = aws_security_group.amz_server_sg.id
@@ -94,6 +130,51 @@ resource "aws_security_group_rule" "ingress_rule_kibana_cidr" {
   type              = "ingress"
   from_port         = 5601
   to_port           = 5601
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_rule_data_feed_api_cidr" {
+  type              = "ingress"
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_rule_data_feed_api_sg" {
+  type                     = "ingress"
+  from_port                = 3000
+  to_port                  = 3000
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.amz_server_sg.id
+  source_security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_rule_data_feed_mongodb_cidr" {
+  type              = "ingress"
+  from_port         = 27017
+  to_port           = 27017
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_rule_http_cidr" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = var.security_group_ingress_cidr
+  security_group_id = aws_security_group.amz_server_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_rule_postgresql_cidr" {
+  type              = "ingress"
+  from_port         = 5432
+  to_port           = 5432
   protocol          = "tcp"
   cidr_blocks       = var.security_group_ingress_cidr
   security_group_id = aws_security_group.amz_server_sg.id

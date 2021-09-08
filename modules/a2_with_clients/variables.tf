@@ -47,8 +47,14 @@ variable "security_group_ingress_cidr" {
 }
 
 
-variable "system_instance_type" {
-  description = "The instance type"
+variable "a2_ec2_type" {
+  description = "The instance type for Chef Automate server"
+  type        = string
+  default     = "t3.large"
+}
+
+variable "client_servers_ec2_type" {
+  description = "The instance type Chef Infra Client servers"
   type        = string
   default     = "t3.large"
 }
@@ -79,6 +85,18 @@ variable "a2_servers" {
 variable "client_servers" {
   description = "Name of systems"
   type        = list(string)
+}
+
+variable "client_servers_win" {
+  description = "Name of systems"
+  type        = list(string)
+  default     = []
+}
+
+variable "client_servers_centos" {
+  description = "Name of systems"
+  type        = list(string)
+  default     = []
 }
 
 variable "system_root_volume_size" {

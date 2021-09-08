@@ -1,9 +1,36 @@
-
+demo_dca
 **/scrap*
 .chef
-Berksfile.lock
-local.tf
 automate-credentials.toml
+*.lock.json
+*.tar.gz
+automate-api-token
+inspec.lock
+*.pem
+
+.vagrant
+*~
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+
+# Bundler
+Gemfile.lock
+gems.locked
+bin/*
+.bundle/*
+
+# test kitchen
+.kitchen/
+kitchen.local.yml
+
+# Chef Infra
+Berksfile.lock
+.zero-knife.rb
+Policyfile.lock.json
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,terraform
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,terraform
