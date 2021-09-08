@@ -7,6 +7,7 @@ automate-credentials.toml
 automate-api-token
 inspec.lock
 *.pem
+*_with_clients/main.tf
 
 .vagrant
 *~

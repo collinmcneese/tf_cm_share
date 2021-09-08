@@ -10,7 +10,7 @@ resource "null_resource" "infra_server_view_create" {
 
   provisioner "local-exec" {
     command = <<-LOCAL_POST
-      key_data=$(echo -n `cat .chef/testuser.pem` | sed 's/ /\\n/g')
+      key_data=$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' .chef/testuser.pem)
       api_token=$(cat automate-api-token)
       a2_server=${aws_instance.a2_servers[0].public_dns}
       echo $key_data
