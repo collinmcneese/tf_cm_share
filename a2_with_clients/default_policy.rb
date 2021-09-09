@@ -10,27 +10,27 @@ name 'default_policy'
 default_source :supermarket
 
 # run_list: chef-client will run these recipes in the order specified.
-run_list 'chef-client::default', 'chef-client::service', 'ssh-hardening::default', 'audit::default'
+run_list 'default_cookbook'
 
 # Specify a custom source for a single cookbook:
-# cookbook 'example_cookbook', path: '../cookbooks/example_cookbook'
+cookbook 'default_cookbook', path: './cookbooks/default_cookbook'
+cookbook 'ssh-hardening'
 
 # Attributes for nodes
 default['audit']['profiles']['ssh-baseline'] = {
-  'git': 'https://github.com/dev-sec/ssh-baseline',
+  'url': 'https://github.com/dev-sec/ssh-baseline/archive/refs/heads/master.zip'
 }
 
+default['audit']['profiles']['windows-baseline'] = {
+  'url': 'https://github.com/dev-sec/windows-baseline/archive/refs/heads/master.zip'
+}
+
+# Enable compliance phase
+default['audit']['compliance_phase'] = true
+
+# Compliance Phase Configuration Items
 default['audit']['fetcher'] = 'chef-server'
-default['audit']['reporter'] = %w(chef-server-automate json-file)
-# default['audit']['reporter'] = 'json-file'
-# default['audit']['json_file']['location'] = '/tmp/audit_report.json'
-
-if Chef::VERSION.to_i >= 15
-  default['chef_client']['config']['audit_mode'] = ":disabled"
-end
-
-if Chef::VERSION.to_i < 13
-  default['audit']['inspec_version'] = '1.6.0'
-end
-
+default['audit']['reporter'] = 'chef-server-automate'
 default['audit']['waiver_file'] = '/var/chef/waivers.yml'
+
+default['inspec_waiver_file_entries'] = []

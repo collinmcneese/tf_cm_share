@@ -49,6 +49,7 @@ resource "null_resource" "client_bootstrap_centos" {
       if grep -q '${aws_instance.client_servers_centos[count.index].public_ip}' ~/.ssh/known_hosts ; then sed -i '/${aws_instance.client_servers_centos[count.index].public_ip}/d' ~/.ssh/known_hosts ; fi
       ssh-keyscan ${aws_instance.client_servers_centos[count.index].public_ip} >> ~/.ssh/known_hosts
       knife bootstrap centos@${aws_instance.client_servers_centos[count.index].public_ip} -N ${aws_instance.client_servers_centos[count.index].tags.ChefClientName} -i ${var.aws_key_file_local} --sudo --policy_group test --policy_name default_policy -y
+      # knife bootstrap centos@${aws_instance.client_servers_centos[count.index].public_ip} -N ${aws_instance.client_servers_centos[count.index].private_dns} -i ${var.aws_key_file_local} --sudo --policy_group test --policy_name default_policy -y
     LOCAL
   }
 }

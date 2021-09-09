@@ -39,6 +39,6 @@ output "public_dns_client_servers" {
 
 output "win_administrator_passwords" {
   value = [
-    for g in aws_instance.client_servers_win : rsadecrypt(g.password_data,file("/Users/cmcneese/.aws/cmcneese-aws-keypair.pem"))
+    for g in aws_instance.client_servers_win : rsadecrypt(g.password_data,file(var.aws_key_file_local))
   ]
 }

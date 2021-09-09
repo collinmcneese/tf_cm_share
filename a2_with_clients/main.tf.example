@@ -1,5 +1,5 @@
 
-module "a2_with_clients" {
+module "a2_with_clients_main" {
   # Pre-existing VPC name
   vpc_name                    = ""
   # Pre-existing subnet name
@@ -8,8 +8,15 @@ module "a2_with_clients" {
   source                      = "../modules/a2_with_clients/"
   # List of Chef Automate servers to create (this example only supports creating one)
   a2_servers                  = ["automate-server"]
+  a2_ec2_type                 = "t3.xlarge"
   # List of clients to create which will be bootstrapped to Automate/CS instance
+  # amazon linux 2 clients
   client_servers              = ["client01", "client02"]
+  client_servers_ec2_type     = "t3.large"
+  # Windows clients
+  // client_servers_win = [
+  //   "winclient01"
+  // ]
   # Will be prefixed on systen names for the Name tag - use first initial and last name
   system_name_prefix          = ""
   # Contact e-mail address to populate the X-Contact tag
@@ -30,7 +37,7 @@ module "a2_with_clients" {
   #  This should _not_ be 0.0.0.0/0, restrict to your current public IP address.
   security_group_ingress_cidr = ["1.1.1.1/32"]
   # Default root volume size for instances which are created
-  system_root_volume_size     = 20
+  system_root_volume_size     = 60
   # this will be fed to the automate_servers remote-exec provisioner
   provisioner_exec_data_a2 = [
     "sudo sysctl -w vm.max_map_count=262144",
@@ -43,6 +50,7 @@ module "a2_with_clients" {
     "sudo chef-server-ctl user-create testuser test user testuser@localhost.localdomain 'Abcd1234' --filename ~/testuser.pem",
     "sudo chef-server-ctl org-create a2local 'A2 Local' --association_user testuser --filename ~/a2local-validator.pem",
     "sudo chmod 644 automate-credentials.toml",
+    "sudo chef-automate iam token create --admin admin > /home/ec2-user/automate-api-token",
   ]
   # this will be fed to the client_servers remote-exec provisioner
   provisioner_exec_data_client = [
@@ -52,21 +60,21 @@ module "a2_with_clients" {
 
 output "a2_name" {
   description = "List of Names assigned to the instances"
-  value       = module.amz_server.instance_name_a2_servers
+  value       = module.a2_with_clients_main.instance_name_a2_servers
 }
 output "a2_dns" {
-  value = module.amz_server.public_dns_a2_servers
+  value = module.a2_with_clients_main.public_dns_a2_servers
 }
 output "a2_ip" {
   description = "List of public IP addresses assigned to the instances"
-  value       = module.amz_server.public_ip_a2_servers
+  value       = module.a2_with_clients_main.public_ip_a2_servers
 }
 
 output "client_names" {
   description = "List of Names assigned to the instances"
-  value       = module.amz_server.instance_name_client_servers
+  value       = module.a2_with_clients_main.instance_name_client_servers
 }
 output "client_ips" {
   description = "List of public IP addresses assigned to the instances"
-  value       = module.amz_server.public_ip_client_servers
+  value       = module.a2_with_clients_main.public_ip_client_servers
 }
