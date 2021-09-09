@@ -28,6 +28,7 @@ variable "provisioner_exec_data_client" {
 variable "aws_profile_name" {
   description = "The name of the aws profile needed for intended use"
   type        = string
+  default     = "default"
 }
 
 variable "aws_region" {

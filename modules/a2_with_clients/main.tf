@@ -59,13 +59,13 @@ data "aws_ami" "windows" {
 data "aws_vpc" "selected" {
   filter {
     name   = "tag:Name"
-    values = [var.vpc_name]
+    values = var.vpc_name == "" ? ["Default VPC"] : [var.vpc_name]
   }
 }
 
 data "aws_subnet" "selected" {
   filter {
     name   = "tag:Name"
-    values = [var.subnet_name]
+    values = var.subnet_name == "" ? ["default-${var.aws_region}a"] : [var.subnet_name]
   }
 }
