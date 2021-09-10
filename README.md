@@ -1,6 +1,6 @@
 # tf_cm_share
 
-Terraform configurations.
+Terraform configuration examples for standing up demo environments.  This should not be used to stand up real, production environments.
 
 ## Modules Included
 
