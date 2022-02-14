@@ -8,6 +8,7 @@ automate-api-token
 inspec.lock
 *.pem
 *_with_clients/main.tf
+local.*
 
 .vagrant
 *~
