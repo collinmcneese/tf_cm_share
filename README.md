@@ -4,7 +4,7 @@ Terraform configuration examples for standing up demo environments.  This should
 
 ## Modules Included
 
-- __modules/a2_with_clients__ : Used to create an all-in-one Chef Automate(plus CS & Builder) server along with clients which are bootstrapped to the server on AWS.  Also creates associated security groups which will be needed for the instances.
+- __modules/a2_with_clients__ : Used to create an all-in-one Chef Automate (plus Chef Infra Server & Habitat Builder) server along with clients which are bootstrapped to the server on AWS.  Also creates associated security groups which will be needed for the instances.
 
 ## Usage
 
@@ -18,7 +18,7 @@ Terraform configuration examples for standing up demo environments.  This should
 
 #### Working with the Infrastructure
 
-- verify that `aws` cli is installed and you are properly authenticated (`okta_aws` is suggested [https://github.com/chef/okta_aws])
+- verify that `aws` cli is installed and you are properly authenticated.
 - Populate values in created `main.tf` which was copied from `main.tf.example`.
 - Execute `terraform plan` to confirm there are no errors.
 - Execute `terraform apply` to build the infrastructure.  This will create with module source of __modules/a2_with_clients__.  Once completed, it will also create a local `.chef` directory at the current location, allowing for `knife` access to the Chef Infra Server instance.  Total creation time is __~10 minutes__.
