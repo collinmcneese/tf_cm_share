@@ -103,7 +103,7 @@ resource "null_resource" "post_bootstrap" {
       chef push test default_policy.lock.json
       for n in `knife node list` ; do scp waivers.yml ec2-user@$n:/tmp/waivers.yml ;  ssh ec2-user@$n "sudo mkdir -p /var/chef/ ; sudo cp /tmp/waivers.yml /var/chef/" ; done
       for n in `knife node list` ; do knife node policy set $n test default_policy ; done
-      knife ssh -x ec2-user "name:*" "sudo chef-client"
+      knife ssh -i ${var.aws_key_file_local} -x ec2-user "name:*" "sudo chef-client"
     LOCAL_POST
   }
 }
