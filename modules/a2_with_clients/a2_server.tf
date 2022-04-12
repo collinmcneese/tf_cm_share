@@ -54,7 +54,7 @@ resource "null_resource" "fetch_automate_credentials" {
 resource "null_resource" "load_inspec_profiles" {
   depends_on = [
     null_resource.fetch_automate_credentials
-    ]
+  ]
 
   count = length(aws_instance.a2_servers.*)
 

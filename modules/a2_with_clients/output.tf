@@ -15,7 +15,7 @@ output "public_dns_a2_servers" {
 
 output "instance_name_client_servers" {
   description = "List of Names assigned to the instances"
-  value       = [
+  value = [
     aws_instance.client_servers.*.tags.Name,
     aws_instance.client_servers_win.*.tags.Name
   ]
@@ -23,7 +23,7 @@ output "instance_name_client_servers" {
 
 output "public_ip_client_servers" {
   description = "List of public IP addresses assigned to the instances"
-  value       = [
+  value = [
     aws_instance.client_servers.*.public_ip,
     aws_instance.client_servers_win.*.public_ip
   ]
@@ -31,7 +31,7 @@ output "public_ip_client_servers" {
 
 output "public_dns_client_servers" {
   description = "List of public DNS names assigned to the instances. For EC2-VPC, this is only available if you've enabled DNS hostnames for your VPC"
-  value       = [
+  value = [
     aws_instance.client_servers.*.public_dns,
     aws_instance.client_servers_win.*.public_dns
   ]
@@ -39,6 +39,6 @@ output "public_dns_client_servers" {
 
 output "win_administrator_passwords" {
   value = [
-    for g in aws_instance.client_servers_win : rsadecrypt(g.password_data,file(var.aws_key_file_local))
+    for g in aws_instance.client_servers_win : rsadecrypt(g.password_data, file(var.aws_key_file_local))
   ]
 }

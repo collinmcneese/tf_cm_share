@@ -10,16 +10,23 @@ resource "aws_instance" "client_servers" {
   user_data                   = var.system_init_user_data
   key_name                    = var.aws_key
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = "1"
+    http_tokens                 = "optional"
+    instance_metadata_tags      = "enabled"
+  }
+
   root_block_device {
     volume_size = var.system_root_volume_size
   }
 
   tags = {
-    Name      = "${var.system_name_prefix} - ${var.client_servers[count.index]}"
-    ChefClientName  = "${var.client_servers[count.index]}"
-    X-Contact = var.contact_tag_value
-    X-Dept    = var.department_tag_value
-    Date      = formatdate("MMM DD, YYYY", timestamp())
+    Name           = "${var.system_name_prefix} - ${var.client_servers[count.index]}"
+    ChefClientName = "${var.client_servers[count.index]}"
+    X-Contact      = var.contact_tag_value
+    X-Dept         = var.department_tag_value
+    Date           = formatdate("MMM DD, YYYY", timestamp())
   }
 
   provisioner "remote-exec" {
@@ -101,9 +108,11 @@ resource "null_resource" "post_bootstrap" {
       for n in `knife node list` ; do ssh-keyscan $n >> ~/.ssh/known_hosts ; done
       chef update default_policy.rb
       chef push test default_policy.lock.json
-      for n in `knife node list` ; do scp waivers.yml ec2-user@$n:/tmp/waivers.yml ;  ssh ec2-user@$n "sudo mkdir -p /var/chef/ ; sudo cp /tmp/waivers.yml /var/chef/" ; done
       for n in `knife node list` ; do knife node policy set $n test default_policy ; done
       knife ssh -i ${var.aws_key_file_local} -x ec2-user "name:*" "sudo chef-client"
+      EDITOR=vim knife environment create test -d
+      EDITOR=vim knife environment create dev -d
+      EDITOR=vim knife environment create prod -d
     LOCAL_POST
   }
 }

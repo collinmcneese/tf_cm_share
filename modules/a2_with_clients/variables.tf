@@ -100,6 +100,12 @@ variable "client_servers_centos" {
   default     = []
 }
 
+variable "client_servers_ubuntu" {
+  description = "Name of systems"
+  type        = list(string)
+  default     = []
+}
+
 variable "system_root_volume_size" {
   type    = number
   default = 8

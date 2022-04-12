@@ -30,11 +30,11 @@ USERDATA
   }
 
   tags = {
-    Name      = "${var.system_name_prefix} - ${var.client_servers_win[count.index]}"
-    ChefClientName  = "${var.client_servers_win[count.index]}"
-    X-Contact = var.contact_tag_value
-    X-Dept    = var.department_tag_value
-    Date      = formatdate("MMM DD, YYYY", timestamp())
+    Name           = "${var.system_name_prefix} - ${var.client_servers_win[count.index]}"
+    ChefClientName = "${var.client_servers_win[count.index]}"
+    X-Contact      = var.contact_tag_value
+    X-Dept         = var.department_tag_value
+    Date           = formatdate("MMM DD, YYYY", timestamp())
   }
 }
 
@@ -53,8 +53,8 @@ resource "null_resource" "win_client_bootstrap" {
 
   provisioner "local-exec" {
     command = <<-LOCAL
-      knife bootstrap winrm://${aws_instance.client_servers_win[count.index].public_ip} -N ${aws_instance.client_servers_win[count.index].tags.ChefClientName} -P '${rsadecrypt(aws_instance.client_servers_win[count.index].password_data,file(var.aws_key_file_local))}' -U administrator --policy-group test --policy-name default_policy -y
-      # knife bootstrap winrm://${aws_instance.client_servers_win[count.index].public_ip} -N ${aws_instance.client_servers_win[count.index].private_dns} -P '${rsadecrypt(aws_instance.client_servers_win[count.index].password_data,file(var.aws_key_file_local))}' -U administrator --policy-group test --policy-name default_policy -y
+      knife bootstrap winrm://${aws_instance.client_servers_win[count.index].public_ip} -N ${aws_instance.client_servers_win[count.index].tags.ChefClientName} -P '${rsadecrypt(aws_instance.client_servers_win[count.index].password_data, file(var.aws_key_file_local))}' -U administrator --policy-group test --policy-name default_policy -y
+      # knife bootstrap winrm://${aws_instance.client_servers_win[count.index].public_ip} -N ${aws_instance.client_servers_win[count.index].private_dns} -P '${rsadecrypt(aws_instance.client_servers_win[count.index].password_data, file(var.aws_key_file_local))}' -U administrator --policy-group test --policy-name default_policy -y
     LOCAL
   }
 }

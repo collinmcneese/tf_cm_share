@@ -13,10 +13,16 @@ module "a2_with_clients_main" {
   # amazon linux 2 clients
   client_servers              = ["client01", "client02"]
   client_servers_ec2_type     = "t3.large"
+  # Ubuntu clients
+  client_servers_ubuntu = [
+    # "ubuntu01",
+    # "ubuntu02"
+  ]
   # Windows clients
-  // client_servers_win = [
-  //   "winclient01"
-  // ]
+  client_servers_win = [
+    # "win01",
+    # "win02"
+  ]
   # Will be prefixed on systen names for the Name tag - use first initial and last name
   system_name_prefix          = ""
   # Contact e-mail address to populate the X-Contact tag

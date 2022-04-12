@@ -15,11 +15,11 @@ resource "aws_instance" "client_servers_centos" {
   }
 
   tags = {
-    Name      = "${var.system_name_prefix} - ${var.client_servers_centos[count.index]}"
-    ChefClientName  = "${var.client_servers_centos[count.index]}"
-    X-Contact = var.contact_tag_value
-    X-Dept    = var.department_tag_value
-    Date      = formatdate("MMM DD, YYYY", timestamp())
+    Name           = "${var.system_name_prefix} - ${var.client_servers_centos[count.index]}"
+    ChefClientName = "${var.client_servers_centos[count.index]}"
+    X-Contact      = var.contact_tag_value
+    X-Dept         = var.department_tag_value
+    Date           = formatdate("MMM DD, YYYY", timestamp())
   }
 
   provisioner "remote-exec" {
